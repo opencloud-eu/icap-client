@@ -3,13 +3,14 @@ package icapclient
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"net"
 	"sync"
 	"time"
 )
 
-// ICAPConnConfig is the configuration for the icap connection
+// ICAPConnConfig is the configuration for the icap connection.
 type ICAPConnConfig struct {
 	// Timeout is the maximum amount of time a connection will be kept open
 	Timeout time.Duration
@@ -66,11 +67,11 @@ func (c *ICAPConn) Send(in []byte) ([]byte, error) {
 	buf := make([]byte, 4096)
 	for {
 		n, err := c.tcp.Read(buf)
-		if err != nil && err != io.EOF {
+		if err != nil && !errors.Is(err, io.EOF) {
 			return nil, err
 		}
 
-		if err == io.EOF || n == 0 {
+		if errors.Is(err, io.EOF) || n == 0 {
 			break
 		}
 
