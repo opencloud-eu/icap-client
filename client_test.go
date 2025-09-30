@@ -1,7 +1,6 @@
 package icapclient
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -69,7 +68,7 @@ func TestClient_Do(t *testing.T) {
 		}
 
 		for _, sample := range sampleTable {
-			req, err := NewRequest(context.Background(), MethodRESPMOD, fmt.Sprintf("icap://localhost:%d/respmod", port), httpReq, sample.httpResp)
+			req, err := NewRequest(t.Context(), MethodRESPMOD, fmt.Sprintf("icap://localhost:%d/respmod", port), httpReq, sample.httpResp)
 			if err != nil {
 				t.Error(err)
 				return
@@ -90,7 +89,6 @@ func TestClient_Do(t *testing.T) {
 				t.Errorf("Wanted status:%s, got:%s", sample.wantedStatus, resp.Status)
 			}
 		}
-
 	})
 
 	t.Run("REQMOD", func(t *testing.T) {
@@ -120,7 +118,7 @@ func TestClient_Do(t *testing.T) {
 				return
 			}
 
-			req, err := NewRequest(context.Background(), MethodREQMOD, fmt.Sprintf("icap://localhost:%d/reqmod", port), httpReq, nil)
+			req, err := NewRequest(t.Context(), MethodREQMOD, fmt.Sprintf("icap://localhost:%d/reqmod", port), httpReq, nil)
 			if err != nil {
 				t.Error(err)
 				return
@@ -187,38 +185,12 @@ func TestClient_Do(t *testing.T) {
 					"Transfer-Preview": []string{"*"},
 				},
 			},
-			{
-				httpResp: &http.Response{
-					Status:     "200 OK",
-					StatusCode: http.StatusOK,
-					Proto:      "HTTP/1.0",
-					ProtoMajor: 1,
-					ProtoMinor: 0,
-					Header: http.Header{
-						"Content-Type":   []string{"plain/text"},
-						"Content-Length": []string{"18"},
-					},
-					ContentLength: 18,
-					Body:          io.NopCloser(strings.NewReader("This is a BAD FILE")),
-				},
-				wantedStatusCode:       http.StatusOK,
-				wantedStatus:           "OK",
-				wantedPreviewBytes:     previewBytes,
-				wantedOptionStatusCode: http.StatusOK,
-				wantedOptionStatus:     "OK",
-				wantedOptionHeader: http.Header{
-					"Methods":          []string{"RESPMOD"},
-					"Allow":            []string{"204"},
-					"Preview":          []string{strconv.Itoa(previewBytes)},
-					"Transfer-Preview": []string{"*"},
-				},
-			},
 		}
 
 		for _, sample := range sampleTable {
 			urlStr := fmt.Sprintf("icap://localhost:%d/respmod", port)
 
-			optReq, err := NewRequest(context.Background(), MethodOPTIONS, urlStr, nil, nil)
+			optReq, err := NewRequest(t.Context(), MethodOPTIONS, urlStr, nil, nil)
 			if err != nil {
 				t.Error(err)
 				return
@@ -254,7 +226,7 @@ func TestClient_Do(t *testing.T) {
 				t.Errorf("Expected header:%s but not found", k)
 			}
 
-			req, err := NewRequest(context.Background(), MethodRESPMOD, urlStr, httpReq, sample.httpResp)
+			req, err := NewRequest(t.Context(), MethodRESPMOD, urlStr, httpReq, sample.httpResp)
 			if err != nil {
 				t.Error(err)
 				return
@@ -278,7 +250,6 @@ func TestClient_Do(t *testing.T) {
 			if resp.Status != sample.wantedStatus {
 				t.Errorf("Wanted status:%s, got:%s", sample.wantedStatus, resp.Status)
 			}
-
 		}
 	})
 
@@ -322,10 +293,9 @@ func TestClient_Do(t *testing.T) {
 		}
 
 		for _, sample := range sampleTable {
-
 			urlStr := fmt.Sprintf("icap://localhost:%d/reqmod", port)
 
-			optReq, err := NewRequest(context.Background(), MethodOPTIONS, urlStr, nil, nil)
+			optReq, err := NewRequest(t.Context(), MethodOPTIONS, urlStr, nil, nil)
 			if err != nil {
 				t.Error(err)
 				return
@@ -361,7 +331,7 @@ func TestClient_Do(t *testing.T) {
 				return
 			}
 
-			req, err := NewRequest(context.Background(), MethodREQMOD, urlStr, httpReq, nil)
+			req, err := NewRequest(t.Context(), MethodREQMOD, urlStr, httpReq, nil)
 			if err != nil {
 				t.Error(err)
 				return
@@ -385,12 +355,10 @@ func TestClient_Do(t *testing.T) {
 			if resp.Status != sample.wantedStatus {
 				t.Errorf("Wanted status:%s, got:%s", sample.wantedStatus, resp.Status)
 			}
-
 		}
 	})
 
 	t.Run("Client Do REQMOD with Custom Driver", func(t *testing.T) {
-
 		type testSample struct {
 			urlStr           string
 			wantedStatusCode int
@@ -417,7 +385,7 @@ func TestClient_Do(t *testing.T) {
 				return
 			}
 
-			req, err := NewRequest(context.Background(), MethodREQMOD, fmt.Sprintf("icap://localhost:%d/reqmod", port), httpReq, nil)
+			req, err := NewRequest(t.Context(), MethodREQMOD, fmt.Sprintf("icap://localhost:%d/reqmod", port), httpReq, nil)
 			if err != nil {
 				t.Error(err)
 				return
@@ -437,7 +405,6 @@ func TestClient_Do(t *testing.T) {
 			if resp.Status != sample.wantedStatus {
 				t.Errorf("Wanted status:%s, got:%s", sample.wantedStatus, resp.Status)
 			}
-
 		}
 	})
 

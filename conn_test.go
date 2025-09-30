@@ -1,15 +1,13 @@
 package icapclient_test
 
 import (
-	"context"
 	"fmt"
 	"net"
 	"testing"
 	"time"
 
+	icapclient "github.com/opencloud-eu/icap-client"
 	"github.com/phayes/freeport"
-
-	icapclient "github.com/egirna/icap-client"
 )
 
 func TestICAPConn_Send(t *testing.T) {
@@ -29,7 +27,7 @@ func TestICAPConn_Send(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = clientConn.Connect(context.Background(), tcp.Addr().String())
+	err = clientConn.Connect(t.Context(), tcp.Addr().String())
 	if err != nil {
 		t.Fatal(err)
 	}

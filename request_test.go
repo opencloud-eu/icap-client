@@ -2,7 +2,6 @@ package icapclient
 
 import (
 	"bytes"
-	"context"
 	"errors"
 	"io"
 	"net/http"
@@ -15,7 +14,6 @@ import (
 
 func TestRequest(t *testing.T) {
 	t.Run("Request Factory", func(t *testing.T) {
-
 		type testSample struct {
 			urlStr    string
 			reqMethod string
@@ -91,16 +89,15 @@ func TestRequest(t *testing.T) {
 		}
 
 		for _, sample := range sampleTable {
-			if _, err := NewRequest(context.Background(), sample.reqMethod, sample.urlStr, sample.httpReq, sample.httpResp); !errors.Is(err, sample.err) {
+			if _, err := NewRequest(t.Context(), sample.reqMethod, sample.urlStr, sample.httpReq, sample.httpResp); !errors.Is(err, sample.err) {
 				t.Logf("Wanted error: %v, got: %v", sample.err, err)
 				t.Fail()
 			}
 		}
-
 	})
 
 	t.Run("setDefaultRequestHeaders", func(t *testing.T) {
-		req, _ := NewRequest(context.Background(), MethodOPTIONS, "icap://localhost:1344/something", nil, nil)
+		req, _ := NewRequest(t.Context(), MethodOPTIONS, "icap://localhost:1344/something", nil, nil)
 		req.setDefaultRequestHeaders()
 
 		if val, exists := req.Header["Allow"]; !exists || len(val) < 1 || val[0] != "204" {
@@ -114,7 +111,7 @@ func TestRequest(t *testing.T) {
 			t.Fail()
 		}
 
-		req, _ = NewRequest(context.Background(), MethodOPTIONS, "icap://localhost:1344/something", nil, nil)
+		req, _ = NewRequest(t.Context(), MethodOPTIONS, "icap://localhost:1344/something", nil, nil)
 		req.Header.Set("Host", "somehost")
 		req.setDefaultRequestHeaders()
 
@@ -122,7 +119,6 @@ func TestRequest(t *testing.T) {
 			t.Logf("Must have Host header with %s as value", "somehost")
 			t.Fail()
 		}
-
 	})
 
 	t.Run("extendHeader", func(t *testing.T) {
@@ -160,7 +156,7 @@ func TestRequest(t *testing.T) {
 		}
 
 		for _, sample := range sampleTable {
-			req, _ := NewRequest(context.Background(), MethodOPTIONS, "icap://localhost:1344/something", nil, nil)
+			req, _ := NewRequest(t.Context(), MethodOPTIONS, "icap://localhost:1344/something", nil, nil)
 			if sample.defaultHeaders {
 				req.setDefaultRequestHeaders()
 			}
@@ -183,13 +179,10 @@ func TestRequest(t *testing.T) {
 				t.Logf("Wanted Address header with value: %v, got: %v", sample.addressValue, val)
 				t.Fail()
 			}
-
 		}
-
 	})
 
 	t.Run("SetPreview", func(t *testing.T) {
-
 		type testSample struct {
 			reqMethod             string
 			previewBytes          int
@@ -244,7 +237,7 @@ func TestRequest(t *testing.T) {
 			httpReq, _ := http.NewRequest(http.MethodPost, "http://someurl.com", bodyData)
 			var req Request
 			if sample.reqMethod == MethodREQMOD {
-				req, _ = NewRequest(context.Background(), sample.reqMethod, "icap://localhost:1344/something", httpReq, nil)
+				req, _ = NewRequest(t.Context(), sample.reqMethod, "icap://localhost:1344/something", httpReq, nil)
 			}
 			if sample.reqMethod == MethodRESPMOD {
 				httpResp := &http.Response{
@@ -260,7 +253,7 @@ func TestRequest(t *testing.T) {
 					ContentLength: int64(bodyData.Len()),
 					Body:          io.NopCloser(strings.NewReader(sample.bodyStr)),
 				}
-				req, _ = NewRequest(context.Background(), sample.reqMethod, "icap://localhost:1344/something", httpReq, httpResp)
+				req, _ = NewRequest(t.Context(), sample.reqMethod, "icap://localhost:1344/something", httpReq, httpResp)
 			}
 
 			if err := req.SetPreview(sample.previewBytes); err != nil {
@@ -302,9 +295,6 @@ func TestRequest(t *testing.T) {
 				t.Logf("Wanted body fitted in preview as: %v, got: %v", sample.bodyFittedInPreview, req.bodyFittedInPreview)
 				t.Fail()
 			}
-
 		}
-
 	})
-
 }

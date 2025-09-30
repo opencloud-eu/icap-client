@@ -3,7 +3,6 @@ package icapclient
 import (
 	"bufio"
 	"bytes"
-	"context"
 	"io"
 	"net/http"
 	"reflect"
@@ -11,7 +10,7 @@ import (
 	"testing"
 )
 
-// export private members for testing
+// export private members for testing.
 const (
 	ICAP100ContinueMsg = icap100ContinueMsg
 	DoubleCRLF         = doubleCRLF
@@ -211,11 +210,9 @@ func TestParsePreviewBodyBytes(t *testing.T) {
 
 func TestToICAPMessage(t *testing.T) {
 	t.Run("MethodOPTIONS", func(t *testing.T) {
-
-		req, _ := NewRequest(context.Background(), MethodOPTIONS, "icap://localhost:1344/something", nil, nil)
+		req, _ := NewRequest(t.Context(), MethodOPTIONS, "icap://localhost:1344/something", nil, nil)
 
 		icapRequest, err := toICAPRequest(req)
-
 		if err != nil {
 			t.Fatal(err.Error())
 		}
@@ -229,13 +226,12 @@ func TestToICAPMessage(t *testing.T) {
 			t.Logf("wanted: %s, got: %s\n", wanted, got)
 			t.Fail()
 		}
-
 	})
 
 	t.Run("MethodREQMOD", func(t *testing.T) { // FIXME: add proper wanted string and complete this unit test
 		httpReq, _ := http.NewRequest(http.MethodGet, "http://someurl.com", nil)
 
-		req, _ := NewRequest(context.Background(), MethodREQMOD, "icap://localhost:1344/something", httpReq, nil)
+		req, _ := NewRequest(t.Context(), MethodREQMOD, "icap://localhost:1344/something", httpReq, nil)
 
 		icapRequest, err := toICAPRequest(req)
 		if err != nil {
@@ -258,7 +254,7 @@ func TestToICAPMessage(t *testing.T) {
 
 		httpReq, _ = http.NewRequest(http.MethodPost, "http://someurl.com", bytes.NewBufferString("Hello World"))
 
-		req, _ = NewRequest(context.Background(), MethodREQMOD, "icap://localhost:1344/something", httpReq, nil)
+		req, _ = NewRequest(t.Context(), MethodREQMOD, "icap://localhost:1344/something", httpReq, nil)
 
 		icapRequest, err = toICAPRequest(req)
 		if err != nil {
@@ -300,7 +296,7 @@ func TestToICAPMessage(t *testing.T) {
 			Body:          io.NopCloser(strings.NewReader("Hello World")),
 		}
 
-		req, _ := NewRequest(context.Background(), MethodRESPMOD, "icap://localhost:1344/something", httpReq, httpResp)
+		req, _ := NewRequest(t.Context(), MethodRESPMOD, "icap://localhost:1344/something", httpReq, httpResp)
 
 		icapRequest, err := toICAPRequest(req)
 		if err != nil {
@@ -436,9 +432,7 @@ func TestToClientResponse(t *testing.T) {
 				t.Logf("Wanted http request: %v, got: %v", wantedHTTPReq, resp.ContentRequest)
 				t.Fail()
 			}
-
 		}
-
 	})
 
 	t.Run("RESPMOD", func(t *testing.T) {
